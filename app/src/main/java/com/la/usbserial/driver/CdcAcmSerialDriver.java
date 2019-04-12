@@ -90,7 +90,8 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
 
         public CdcAcmSerialPort(UsbDevice device, int portNumber) {
             super(device, portNumber);
-            mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            // mEnableAsyncReads = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1);
+            mEnableAsyncReads = false;
         }
 
         @Override
@@ -238,29 +239,40 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
         @Override
         public int read(byte[] dest, int timeoutMillis) throws IOException {
             if (mEnableAsyncReads) {
-              final UsbRequest request = new UsbRequest();
-              try {
-                request.initialize(mConnection, mReadEndpoint);
-                final ByteBuffer buf = ByteBuffer.wrap(dest);
-                if (!request.queue(buf, dest.length)) {
-                  throw new IOException("Error queueing request.");
-                }
+//                Log.d(TAG, "<read>AsyncReads BEGIN.");
+                final UsbRequest request = new UsbRequest();
+                try {
+                    request.initialize(mConnection, mReadEndpoint);
+//                    Log.d(TAG, "<read>request.initialize End.");
+                    final ByteBuffer buf = ByteBuffer.wrap(dest);
+                    if (!request.queue(buf, dest.length)) {
+                        throw new IOException("Error queueing request.");
+                    }
 
-                final UsbRequest response = mConnection.requestWait();
-                if (response == null) {
-                  throw new IOException("Null response");
-                }
+//                    Log.d(TAG, "<read>response BEGIN.");
+                    final UsbRequest response = mConnection.requestWait();
+                    if (response == null) {
+                        throw new IOException("Null response");
+                    }
+//                    Log.d(TAG, "<read>response End.");
 
-                final int nread = buf.position();
-                if (nread > 0) {
-                  //Log.d(TAG, HexDump.dumpHexString(dest, 0, Math.min(32, dest.length)));
-                  return nread;
-                } else {
-                  return 0;
+                    final int nread = buf.position();
+                    if (nread > 0) {
+                        //Log.d(TAG, HexDump.dumpHexString(dest, 0, Math.min(32, dest.length)));
+                        return nread;
+                    } else {
+                        return 0;
+                    }
+                } finally {
+                    request.close();
+//                    Log.d(TAG, "<read>request.close End.");
                 }
-              } finally {
-                request.close();
-              }
+            }
+
+            if (mEnableAsyncReads) {
+//                Log.d(TAG, "<read>AsyncReads END");
+            } else {
+//                Log.d(TAG, "<read>AsyncReads unable.");
             }
 
             final int numBytesRead;
@@ -279,6 +291,7 @@ public class CdcAcmSerialDriver implements UsbSerialDriver {
                     }
                     return 0;
                 }
+                Log.d(TAG, "<read>numBytesRead: " + numBytesRead);
                 System.arraycopy(mReadBuffer, 0, dest, 0, numBytesRead);
             }
             return numBytesRead;

@@ -101,6 +101,7 @@ public class SerialInputOutputManager implements Runnable {
     public void writeAsync(byte[] data) {
         synchronized (mWriteBuffer) {
             mWriteBuffer.put(data);
+            Log.d(TAG, "<writeAsync>Put data: " + MsgHandler.toHexString(data));
         }
     }
 
@@ -138,6 +139,7 @@ public class SerialInputOutputManager implements Runnable {
                     Log.i(TAG, "Stopping mState=" + getState());
                     break;
                 }
+//                if (DEBUG) { Log.d(TAG, "<run>while operating normally."); }
                 step();
             }
         } catch (Exception e) {
@@ -155,8 +157,12 @@ public class SerialInputOutputManager implements Runnable {
     }
 
     private void step() throws IOException {
+        boolean STEP_DEBUG = false;
         // Handle incoming data.
+        if (STEP_DEBUG) { Log.d(TAG, "<step>mDriver.read BEGIN."); }
         int len = mDriver.read(mReadBuffer.array(), READ_WAIT_MILLIS);
+        if (STEP_DEBUG) { Log.d(TAG, "<step>mDriver.read END."); }
+
         if (len > 0) {
             if (DEBUG) Log.d(TAG, "Read data len=" + len);
             final Listener listener = getListener();
@@ -167,6 +173,7 @@ public class SerialInputOutputManager implements Runnable {
             }
             mReadBuffer.clear();
         }
+        if (STEP_DEBUG) { Log.d(TAG, "<step>Incoming data handled."); }
 
         // Handle outgoing data.
         byte[] outBuff = null;
@@ -185,6 +192,7 @@ public class SerialInputOutputManager implements Runnable {
             }
             mDriver.write(outBuff, READ_WAIT_MILLIS);
         }
+        if (STEP_DEBUG) { Log.d(TAG, "<step>Outgoing data handled."); }
     }
 
 }

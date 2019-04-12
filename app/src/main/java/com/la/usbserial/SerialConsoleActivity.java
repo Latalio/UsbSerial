@@ -29,14 +29,11 @@ import android.hardware.usb.UsbManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.la.usbserial.driver.UsbSerialPort;
 import com.la.usbserial.util.HexDump;
-import com.la.usbserial.util.MsgWrapper;
+import com.la.usbserial.util.MsgHandler;
 import com.la.usbserial.util.SerialInputOutputManager;
 
 import java.io.IOException;
@@ -154,13 +151,13 @@ public class SerialConsoleActivity extends Activity {
         super.onResume();
         Log.d(TAG, "Resumed, port=" + sPort);
         if (sPort == null) {
-            mMsgText.setText(MsgWrapper.system("No serial device."));
+            mMsgText.setText(MsgHandler.system("No serial device."));
         } else {
             final UsbManager usbManager = (UsbManager) getSystemService(Context.USB_SERVICE);
 
             UsbDeviceConnection connection = usbManager.openDevice(sPort.getDriver().getDevice());
             if (connection == null) {
-                mMsgText.setText(MsgWrapper.system("Opening device failed"));
+                mMsgText.setText(MsgHandler.system("Opening device failed"));
                 return;
             }
 
@@ -178,7 +175,7 @@ public class SerialConsoleActivity extends Activity {
 
             } catch (IOException e) {
                 Log.e(TAG, "Error setting up device: " + e.getMessage(), e);
-                mMsgText.setText(MsgWrapper.error("Error opening device: " + e.getMessage()));
+                mMsgText.setText(MsgHandler.error("Error opening device: " + e.getMessage()));
                 try {
                     sPort.close();
                 } catch (IOException e2) {
@@ -188,7 +185,7 @@ public class SerialConsoleActivity extends Activity {
                 return;
             }
             mMsgText.setText(
-                    MsgWrapper.system("Serial device: " + sPort.getClass().getSimpleName()));
+                    MsgHandler.system("Serial device: " + sPort.getClass().getSimpleName()));
         }
         onDeviceStateChange();
     }

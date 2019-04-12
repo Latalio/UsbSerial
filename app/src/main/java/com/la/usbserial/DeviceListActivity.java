@@ -35,6 +35,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.constraint.ConstraintLayout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -111,9 +112,14 @@ public class DeviceListActivity extends Activity {
 //                } else {
 //                    row = (TwoLineListItem) convertView;
 //                }
-                ConstraintLayout devItem = findViewById(R.id.devItem);
-                TextView devName = findViewById(R.id.devName);
-                TextView devDesc = findViewById(R.id.devDesc);
+//                LayoutInflater inflater =
+//                        (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+//                View view = inflater.inflate(R.layout.device_list, null);
+                View devItem = LayoutInflater.from(getContext()).inflate(R.layout.list_item, null);
+                TextView devName = devItem.findViewById(R.id.devName);
+                TextView devDesc = devItem.findViewById(R.id.devDesc);
+                Log.d(TAG, devName.toString());
+                Log.d(TAG, devDesc.toString());
 
                 final UsbSerialPort port = mEntries.get(position);
                 final UsbSerialDriver driver = port.getDriver();
@@ -123,7 +129,9 @@ public class DeviceListActivity extends Activity {
                         HexDump.toHexString((short) device.getVendorId()),
                         HexDump.toHexString((short) device.getProductId()));
 //                row.getText1().setText(title);
+                Log.d(TAG, title.toString());
                 devName.setText(title);
+
 
                 final String subtitle = driver.getClass().getSimpleName();
 //                row.getText2().setText(subtitle);
